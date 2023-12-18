@@ -112,7 +112,6 @@ class Event_Connection_Resolver extends PostObjectConnectionResolver {
 		$query_args['graphql_cursor_compare'] = ( ! empty( $last ) ) ? '>' : '<';
 		$query_args['graphql_after_cursor']   = $this->get_after_offset();
 		$query_args['graphql_before_cursor']  = $this->get_before_offset();
-		$query_args['graphql_cursor_id_key']  = Occurrences::table_name() . '.occurrence_id';
 
 		if ( false !== $cursor_offset ) {
 			/**
@@ -130,11 +129,13 @@ class Event_Connection_Resolver extends PostObjectConnectionResolver {
 			$query_args['graphql_cursor_id_value'] = $cursor_id;
 
 			$cursor_node                                 = tribe_get_event( $cursor_offset );
+			$order = isset( $last ) ? 'DESC' : 'ASC';
 			$query_args['graphql_cursor_compare_fields'] = [
 				[
 					'key'   => Occurrences::table_name() . '.start_date_utc',
 					'value' => $cursor_node->start_date_utc,
 					'type'  => 'DATETIME',
+					'order' => $order
 				],
 			];
 
@@ -263,8 +264,13 @@ class Event_Connection_Resolver extends PostObjectConnectionResolver {
 		 * If there's no orderby params in the inputArgs, set order based on the first/last argument.
 		 */
 		if ( empty( $query_args['orderby'] ) ) {
-			$query_args['orderby'] = 'event_date';
-			$query_args['order']   = ! empty( $last ) ? 'ASC' : 'DESC';
+			$order =( ! empty( $last )) ? 'DESC' : 'ASC';
+
+			$query_args['orderby'] = [
+				'event_date_utc' => $order, 
+				'title' => $order,
+			];
+
 		}
 
 		/**
