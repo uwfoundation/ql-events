@@ -265,10 +265,12 @@ class Event_Connection_Resolver extends PostObjectConnectionResolver {
 		 */
 		if ( empty( $query_args['orderby'] ) ) {
 			$order =( ! empty( $last )) ? 'DESC' : 'ASC';
+			$idOrder = ($order === 'DESC') ? 'ASC' : 'DESC';
 
 			$query_args['orderby'] = [
 				'event_date_utc' => $order, 
 				'title' => $order,
+				'ID' => $idOrder,
 			];
 
 		}
@@ -430,7 +432,10 @@ class Event_Connection_Resolver extends PostObjectConnectionResolver {
 	public function get_nodes() {
 		$nodes = parent::get_nodes();
 		if ( ! empty( $nodes ) && ! empty( $this->args['last'] ) ) {
-			$nodes = array_reverse( $nodes, true );
+			// we don't actually want to reverse this just because "last" is present. Paginated 
+			// events should appear in the same order when moving forward or backward through the 
+			// pages.
+			//$nodes = array_reverse( $nodes, true );
 		}
 		return $nodes;
 	}
